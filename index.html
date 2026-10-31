@@ -55,8 +55,44 @@
             color: #64748b;
             text-align: center;
             margin-top: 0;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             font-size: 0.95rem;
+        }
+
+        /* Update Notification Banner Styles */
+        .update-banner {
+            display: none;
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .update-banner.active { display: flex; }
+        .update-banner button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .update-banner button:hover { background: var(--primary-hover); }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .device-badge {
@@ -67,10 +103,21 @@
             border-radius: 1rem;
             font-size: 0.75rem;
             font-weight: 700;
-            margin-bottom: 1.5rem;
             text-transform: uppercase;
-            text-align: center;
         }
+
+        .update-check-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: #475569;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .update-check-btn:hover { background: #f1f5f9; color: var(--primary); border-color: var(--primary); }
 
         .tabs {
             display: flex;
@@ -143,7 +190,7 @@
             width: 100%;
         }
 
-        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+        select:focus, input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
         }
@@ -298,17 +345,8 @@
             gap: 2px;
         }
 
-        .missing-badge {
-            color: #dc2626;
-            font-weight: bold;
-            font-size: 0.75rem;
-        }
-
-        .found-badge {
-            color: #16a34a;
-            font-weight: 500;
-            font-size: 0.75rem;
-        }
+        .missing-badge { color: #dc2626; font-weight: bold; font-size: 0.75rem; }
+        .found-badge { color: #16a34a; font-weight: 500; font-size: 0.75rem; }
 
         /* Module 3 Specific Styles */
         .timeline-container {
@@ -438,15 +476,6 @@
             box-sizing: border-box;
             line-height: 1.4rem;
         }
-
-        .roster-item {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            border-bottom: 1px dashed #e2e8f0;
-            padding-bottom: 2px;
-            margin-bottom: 2px;
-        }
     </style>
 </head>
 <body>
@@ -454,7 +483,20 @@
 <div class="container" style="text-align: center;">
     <h1>Unified Classroom Data Toolkit</h1>
     <p class="subtitle">All-in-one suite for grades extraction, attendance & exam processing, and drag-and-drop LMS splitting.</p>
-    <div id="device-badge" class="device-badge">Detecting device...</div>
+    
+    <!-- Update Notification Banner -->
+    <div id="update-banner" class="update-banner">
+        <span id="update-banner-text">🚀 A new update is available on GitHub!</span>
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="window.open('https://github.com/Discord615/Unified-Classroom-Kit', '_blank')">View Repo</button>
+            <button style="background: #475569;" onclick="document.getElementById('update-banner').classList.remove('active')">Dismiss</button>
+        </div>
+    </div>
+
+    <div class="header-meta">
+        <div id="device-badge" class="device-badge">Detecting device...</div>
+        <button class="update-check-btn" onclick="checkForUpdates(true)">🔄 Check for Updates</button>
+    </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('grades')">Excel Class Data Extractor</button>
@@ -555,7 +597,6 @@
         <div id="file-info-att-proc" class="file-info">Ready for attendance and exam file uploads.</div>
 
         <div class="output-grid-3col">
-            <!-- Left Sidebar: Student Name & Exam Status Container -->
             <div class="output-section">
                 <div class="output-header">
                     <label><strong style="color: #4f46e5;">Student Roster & Exam Status</strong></label>
@@ -565,7 +606,6 @@
                 </div>
             </div>
 
-            <!-- Middle: Raw Attendance Matrix Copy-Paste Area -->
             <div class="output-section">
                 <div class="output-header">
                     <label><strong style="color: #4f46e5;">Attendance Matrix (P/A/L Only)</strong></label>
@@ -574,7 +614,6 @@
                 <textarea id="output-attendance-matrix" readonly placeholder="Raw P, A, L attendance matrix..."></textarea>
             </div>
 
-            <!-- Right: Aligned Exam Scores Copy-Paste Area -->
             <div class="output-section">
                 <div class="output-header">
                     <label><strong style="color: #16a34a;">Aligned Exam Scores</strong></label>
@@ -614,7 +653,6 @@
         </div>
 
         <div class="output-grid-splitter">
-            <!-- Side Student Name Checklist -->
             <div class="side-roster-box">
                 <div class="output-header">
                     <label><strong>Sorted Roster (A-Z)</strong></label>
@@ -624,7 +662,6 @@
                 </div>
             </div>
 
-            <!-- Group A Pure Scores -->
             <div class="output-box">
                 <div class="output-header">
                     <label><strong style="color: #4f46e5;">Group A Scores Only</strong></label>
@@ -633,7 +670,6 @@
                 <textarea id="output-a" readonly placeholder="Group A scores will appear here..."></textarea>
             </div>
 
-            <!-- Group B Pure Scores -->
             <div class="output-box">
                 <div class="output-header">
                     <label><strong style="color: #16a34a;">Group B Scores Only</strong></label>
@@ -646,6 +682,44 @@
 </div>
 
 <script>
+    // --- GITHUB UPDATE CHECKER ---
+    async function checkForUpdates(isManual = false) {
+        const banner = document.getElementById('update-banner');
+        const bannerText = document.getElementById('update-banner-text');
+
+        try {
+            const response = await fetch('https://api.github.com/repos/Discord615/Unified-Classroom-Kit/commits/main');
+            
+            if (!response.ok) {
+                if (isManual) alert("Could not fetch repository info. Ensure the repository visibility is set to Public.");
+                return;
+            }
+
+            const data = await response.json();
+            const latestSha = data.sha;
+            const commitMsg = data.commit.message;
+            const commitDate = new Date(data.commit.committer.date).toLocaleDateString();
+
+            const savedLatestSha = localStorage.getItem('gh_latest_known_sha');
+
+            if (savedLatestSha && savedLatestSha !== latestSha) {
+                bannerText.innerHTML = `🚀 <b>New update available!</b> (${commitDate}: "${commitMsg}")`;
+                banner.classList.add('active');
+            } else {
+                localStorage.setItem('gh_latest_known_sha', latestSha);
+                if (isManual) alert("You are currently using the latest version!");
+            }
+        } catch (err) {
+            if (isManual) alert("Could not connect to GitHub. Check your internet connection.");
+        }
+    }
+
+    // Run silent check on page launch
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(checkForUpdates, 1500);
+    });
+
+    // --- DEVICE DETECTION ---
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
     const deviceBadge = document.getElementById('device-badge');
 
@@ -1350,7 +1424,7 @@
         document.getElementById('output-b').value = outputBRows.length ? outputBRows.join('\n') : "No columns or records in Group B.";
     }
 
-    // --- BULLETPROOF COPY FUNCTION (Android/Tablet Friendly) ---
+    // --- BULLETPROOF COPY FUNCTION ---
     window.copyText = function(elementId, btn) {
         const textarea = document.getElementById(elementId);
         if (!textarea || !textarea.value) return;
